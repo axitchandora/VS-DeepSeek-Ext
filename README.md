@@ -1,71 +1,86 @@
-# vs-deepseek-ext README
+# DeepSeek VS Code Extension (Powered by Ollama)
 
-This is the README for your extension "vs-deepseek-ext". After writing up a brief description, we recommend including the following sections.
+## Overview
+The **DeepSeek VS Code Extension** enables developers to interact with DeepSeek AI directly from their VS Code environment. This extension leverages **Ollama** for powerful AI-based responses, making it easier to generate code, get explanations, and automate tasks within the editor.
+
+![Demo Image](img/image.png)
 
 ## Features
+- 🚀 **Send AI Prompts**: Quickly enter and send prompts to DeepSeek AI.
+- 💡 **Receive AI Responses**: Get instant answers displayed within the extension panel.
+- 🎨 **Dark Theme Support**: Designed to blend seamlessly with VS Code's dark mode.
+- 🔗 **VS Code Integration**: Uses `acquireVsCodeApi()` for smooth communication.
+- 🤖 **Powered by Ollama**: Utilizes Ollama's AI capabilities to generate intelligent responses.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Installation
+1. **Clone the Repository**
+   ```sh
+   git clone https://github.com/axitchandora/VS-DeepSeek-Ext.git
+   cd VS-DeepSeek-Ext
+   ```
+2. **Install Dependencies** (if applicable)
+   ```sh
+   npm install
+   ```
+3. **Run in VS Code**
+   - Open the project in VS Code.
+   - Press `F5` to launch the extension in a new VS Code window.
 
-For example if there is an image subfolder under your extension project workspace:
+## Usage
+1. Open the **DeepSeek Panel** from the **VS Code sidebar**.
+2. Enter a **prompt** in the textarea.
+3. Click **"Ask"** to send the prompt to DeepSeek AI.
+4. View the **AI-generated response** inside the response box.
 
-\!\[feature X\]\(images/feature-x.png\)
+## How It Works
+- The extension creates a webview panel inside VS Code.
+- The user enters a prompt and clicks "Ask."
+- The extension sends the prompt to **Ollama's DeepSeek model** using `ollama.chat()`.
+- AI responses are streamed back and displayed inside the webview panel.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Code Reference
+The core functionality is implemented in the **extension.ts** file:
+```typescript
+panel.webview.onDidReceiveMessage(async (message: any) => {
+    if (message.command === 'chat') {
+        const userPrompt = message.text;
+        let responseText = '';
+
+        try {
+            const streamResponse = await ollama.chat({
+                model: 'deepseek-r1:1.5b',
+                messages: [{ role: 'user', content: userPrompt }],
+                stream: true
+            });
+
+            for await (const part of streamResponse) {
+                responseText += part.message.content;
+                panel.webview.postMessage({ command: 'chatResponse', text: responseText });
+            }
+        } catch (err) {
+            panel.webview.postMessage({ command: 'chatResponse', text: `Error: ${String(err)}` });
+        }
+    }
+});
+```
 
 ## Requirements
+- Visual Studio Code (Latest Version)
+- Node.js & npm (for development)
+- Ollama installed and configured
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## Contributing
+We welcome contributions! Follow these steps:
+1. Fork the repository.
+2. Create a new branch (`feature-branch`).
+3. Commit your changes and push to GitHub.
+4. Submit a Pull Request.
 
-## Extension Settings
+## License
+This project is licensed under the **MIT License**.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+## Support
+For any issues, open a GitHub [issue](https://github.com/axitchandora/VS-DeepSeek-Ext/issues).
 
 ---
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+✨ **Enhance your VS Code experience with AI-powered assistance!** ✨
